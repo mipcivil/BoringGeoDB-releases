@@ -1,0 +1,1489 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="description" content="BoringGeoDB - 地質調査データベースソフト。複数ボーリングXMLの一括管理・地図表示・断面図・納品データ生成。">
+  <title>BoringGeoDB - 地質調査データベースソフト</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+JP:wght@400;500;700&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --primary: #0f766e;
+      --primary-light: #14b8a6;
+      --primary-dark: #134e4a;
+      --accent: #e67e22;
+      --accent-light: #f39c12;
+      --bg: #f5f6f8;
+      --bg-alt: #f0fdfa;
+      --card-bg: #ffffff;
+      --text: #1e293b;
+      --text-muted: #64748b;
+      --border: #e2e8f0;
+      --green: #16a34a;
+      --green-light: #dcfce7;
+      --teal-light: #ccfbf1;
+      --section-gap: 64px;
+    }
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    body {
+      font-family: "Noto Sans JP", "Hiragino Kaku Gothic ProN", "Meiryo", sans-serif;
+      color: var(--text);
+      background: var(--bg);
+      line-height: 1.9;
+      font-size: 15px;
+    }
+    h1, h2, h3 { line-height: 1.4; }
+    .container { max-width: 1120px; margin: 0 auto; padding: 0 32px; }
+
+    /* ========== Navigation ========== */
+    nav {
+      background: #fff;
+      padding: 0 32px;
+      position: sticky;
+      top: 0;
+      z-index: 100;
+      border-bottom: 1px solid var(--border);
+      box-shadow: 0 1px 3px rgba(0,0,0,0.04);
+    }
+    nav .container {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      height: 52px;
+    }
+    nav .logo {
+      color: var(--primary);
+      font-weight: 700;
+      font-size: 1.05rem;
+      text-decoration: none;
+      letter-spacing: 0.02em;
+    }
+    nav .nav-links { display: flex; gap: 28px; }
+    nav .nav-links a {
+      color: var(--text-muted);
+      text-decoration: none;
+      font-size: 0.88rem;
+      transition: color 0.2s;
+    }
+    nav .nav-links a:hover { color: var(--primary); }
+
+    /* ========== Hero ========== */
+    .hero {
+      color: var(--text);
+      padding: 56px 32px 48px;
+      border-bottom: 1px solid var(--border);
+    }
+    .hero .container {
+      max-width: 1120px;
+      display: flex;
+      align-items: center;
+      gap: 48px;
+    }
+    .hero-text { flex: 1; min-width: 0; }
+    .hero-image { display: block !important; flex: 1.2; min-width: 0; }
+    .hero-image img {
+      width: 100%;
+      border-radius: 8px;
+      box-shadow: 0 4px 24px rgba(0,0,0,0.10);
+      border: 1px solid var(--border);
+    }
+    .hero-badges { display: flex; gap: 8px; margin-bottom: 16px; }
+    .badge {
+      display: inline-block;
+      padding: 3px 12px;
+      border-radius: 20px;
+      font-size: 0.75rem;
+      font-weight: 500;
+    }
+    .badge-platform { background: rgba(240,253,250,0.9); color: var(--primary); }
+    .badge-beta { background: rgba(254,243,199,0.9); color: #92400e; }
+    .hero h1 {
+      font-size: 1.5rem;
+      font-weight: 700;
+      margin-bottom: 10px;
+      letter-spacing: 0.01em;
+      color: var(--text);
+    }
+    .hero-subtitle {
+      font-size: 0.95rem;
+      color: var(--text-muted);
+      margin-bottom: 6px;
+    }
+    .hero-desc {
+      font-size: 0.88rem;
+      color: var(--text-muted);
+      margin-bottom: 28px;
+      line-height: 1.8;
+    }
+    .hero-buttons { display: flex; gap: 12px; flex-wrap: wrap; }
+    .hero-version {
+      margin-top: 20px;
+      font-size: 0.78rem;
+      color: var(--text-muted);
+    }
+    .hero-version a { color: var(--primary); text-decoration: none; }
+    .hero-version a:hover { text-decoration: underline; }
+    @media (max-width: 900px) {
+      .hero .container { flex-direction: column; gap: 32px; text-align: center; }
+      .hero-badges { justify-content: center; }
+      .hero-buttons { justify-content: center; }
+      .hero-image { max-width: 520px; }
+    }
+
+    /* ========== Buttons ========== */
+    .btn {
+      display: inline-block;
+      padding: 13px 28px;
+      border-radius: 6px;
+      text-decoration: none;
+      font-weight: 700;
+      font-size: 0.92rem;
+      transition: all 0.2s;
+      border: none;
+      cursor: pointer;
+    }
+    .btn-primary { background: var(--primary); color: #fff; }
+    .btn-primary:hover { background: var(--primary-dark); transform: translateY(-1px); }
+    .btn-outline { background: transparent; color: var(--text-muted); border: 1px solid var(--border); }
+    .btn-outline:hover { border-color: var(--primary); color: var(--primary); }
+    .btn-green { background: var(--green); color: #fff; }
+    .btn-green:hover { background: #15803d; }
+    .btn-teal { background: var(--primary-light); color: #fff; }
+    .btn-teal:hover { background: var(--primary); }
+
+    /* ========== Specs Bar ========== */
+    .specs-bar {
+      background: var(--primary-dark);
+      border-top: 1px solid rgba(255,255,255,0.08);
+      padding: 18px 32px;
+    }
+    .specs-bar .container {
+      display: flex;
+      justify-content: center;
+      gap: 48px;
+    }
+    .spec-item {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      color: rgba(255,255,255,0.8);
+      font-size: 0.85rem;
+    }
+    .spec-icon {
+      width: 36px;
+      height: 36px;
+      background: rgba(255,255,255,0.1);
+      border-radius: 8px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 1rem;
+    }
+
+    /* ========== Section Common ========== */
+    section { padding: var(--section-gap) 0; }
+    .section-header { text-align: center; margin-bottom: 48px; }
+    .section-header h2 {
+      font-size: 1.4rem;
+      font-weight: 700;
+      margin-bottom: 8px;
+      color: var(--text);
+    }
+    .section-header p {
+      font-size: 0.92rem;
+      color: var(--text-muted);
+    }
+
+    /* ========== Pain Points ========== */
+    .pain-section { background: var(--bg-alt); }
+    .pain-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 20px;
+      max-width: 800px;
+      margin: 0 auto;
+    }
+    .pain-item {
+      display: flex;
+      gap: 14px;
+      align-items: flex-start;
+      background: var(--card-bg);
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      padding: 20px;
+    }
+    .pain-icon {
+      flex-shrink: 0;
+      width: 40px;
+      height: 40px;
+      background: #fef3c7;
+      border-radius: 8px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 1.1rem;
+    }
+    .pain-item h4 { font-size: 0.92rem; margin-bottom: 4px; }
+    .pain-item p { font-size: 0.85rem; color: var(--text-muted); }
+
+    /* ========== Features ========== */
+    .features-grid {
+      display: grid;
+      grid-template-columns: repeat(2, 1fr);
+      gap: 20px;
+    }
+    .feature-card {
+      background: var(--card-bg);
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      padding: 24px;
+    }
+    .feature-icon { font-size: 1.1rem; margin-bottom: 12px; }
+    .feature-card h3 { font-size: 0.95rem; margin-bottom: 6px; font-weight: 700; }
+    .feature-card p { font-size: 0.85rem; color: var(--text-muted); line-height: 1.7; }
+
+    /* ========== Relationship ========== */
+    .relationship-section { background: var(--bg-alt); }
+    .relationship-card {
+      background: var(--card-bg);
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      padding: 32px;
+      max-width: 720px;
+      margin: 0 auto;
+    }
+    .relationship-card h3 { font-size: 1rem; margin-bottom: 16px; text-align: center; }
+    .product-compare {
+      display: grid;
+      grid-template-columns: 1fr auto 1fr;
+      gap: 16px;
+      align-items: center;
+    }
+    .product-box {
+      background: var(--bg);
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      padding: 20px;
+      text-align: center;
+    }
+    .product-box.active { border-color: var(--primary); background: var(--teal-light); }
+    .product-box h4 { font-size: 0.95rem; margin-bottom: 8px; }
+    .product-box p { font-size: 0.82rem; color: var(--text-muted); }
+    .product-arrow { font-size: 1.5rem; color: var(--primary); font-weight: 700; }
+
+    /* ========== Download ========== */
+    .download-card {
+      background: var(--card-bg);
+      border: 2px solid var(--primary);
+      border-radius: 12px;
+      padding: 40px;
+      text-align: center;
+      max-width: 560px;
+      margin: 0 auto;
+    }
+    .download-card h3 { font-size: 1.15rem; margin-bottom: 8px; }
+    .download-info { color: var(--text-muted); font-size: 0.9rem; margin-bottom: 24px; }
+    .download-meta {
+      display: flex;
+      justify-content: center;
+      gap: 24px;
+      margin-top: 20px;
+      font-size: 0.82rem;
+      color: var(--text-muted);
+    }
+
+    /* ========== How It Works ========== */
+    .howto-section { background: var(--bg-alt); }
+    .steps-grid {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 20px;
+    }
+    .step {
+      background: var(--card-bg);
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      padding: 28px 24px;
+      text-align: center;
+    }
+    .step-number {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      width: 36px;
+      height: 36px;
+      background: var(--primary);
+      color: #fff;
+      border-radius: 50%;
+      font-weight: 700;
+      font-size: 0.9rem;
+      margin-bottom: 14px;
+    }
+    .step h3 { font-size: 0.95rem; margin-bottom: 8px; }
+    .step p { font-size: 0.82rem; color: var(--text-muted); }
+
+    /* ========== Pricing ========== */
+    .pricing-grid {
+      display: grid;
+      grid-template-columns: repeat(2, 1fr);
+      gap: 20px;
+      max-width: 680px;
+      margin: 0 auto;
+    }
+    .pricing-card {
+      background: var(--card-bg);
+      border: 2px solid var(--border);
+      border-radius: 12px;
+      padding: 32px 28px;
+      text-align: center;
+      transition: box-shadow 0.2s;
+    }
+    .pricing-card:hover { box-shadow: 0 2px 8px rgba(0,0,0,0.05); }
+    .pricing-card.free { border-color: var(--green); }
+    .pricing-card.featured {
+      border-color: var(--primary-light);
+      box-shadow: 0 4px 24px rgba(15,118,110,0.1);
+    }
+    .pricing-card .plan-name { font-size: 1rem; font-weight: 700; margin-bottom: 14px; }
+    .pricing-card .price { font-size: 2.2rem; font-weight: 700; color: var(--primary); }
+    .pricing-card.free .price { color: var(--green); font-size: 1.8rem; }
+    .pricing-card .price-sub { font-size: 0.82rem; color: var(--text-muted); margin-bottom: 4px; }
+    .pricing-card .period { font-size: 0.88rem; color: var(--text-muted); }
+    .pricing-card ul { text-align: left; margin: 20px 0; list-style: none; }
+    .pricing-card li { padding: 5px 0; font-size: 0.85rem; }
+    .pricing-card li.yes::before { content: "\2713\0020"; color: var(--green); font-weight: bold; }
+    .pricing-card li.no { color: #cbd5e1; }
+    .pricing-card li.no::before { content: "\2717\0020"; color: #cbd5e1; font-weight: bold; }
+
+    /* ========== Manage Subscription ========== */
+    .manage-sub {
+      background: var(--card-bg);
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      padding: 32px;
+      max-width: 480px;
+      margin: 0 auto;
+      text-align: center;
+    }
+    .manage-sub p { font-size: 0.9rem; color: var(--text-muted); margin-bottom: 16px; }
+    .manage-sub input[type="email"] {
+      width: 100%;
+      padding: 10px 14px;
+      border: 1px solid var(--border);
+      border-radius: 6px;
+      font-size: 0.95rem;
+      background: var(--bg);
+      color: var(--text);
+      box-sizing: border-box;
+    }
+    .manage-sub input[type="email"]:focus {
+      outline: none;
+      border-color: var(--primary-light);
+      box-shadow: 0 0 0 3px rgba(20,184,166,0.12);
+    }
+    .manage-sub .btn-manage {
+      margin-top: 12px;
+      padding: 10px 28px;
+      background: var(--text);
+      color: var(--card-bg);
+      border: none;
+      border-radius: 6px;
+      font-size: 0.95rem;
+      font-weight: 600;
+      cursor: pointer;
+      transition: opacity 0.15s;
+    }
+    .manage-sub .btn-manage:hover { opacity: 0.85; }
+    .manage-sub .btn-manage:disabled { opacity: 0.5; cursor: not-allowed; }
+    .manage-sub .manage-error { color: #e74c3c; font-size: 0.85rem; margin-top: 8px; }
+    .manage-sub .manage-note { font-size: 0.8rem; color: var(--text-muted); margin-top: 12px; }
+
+    /* ========== Purchase Modal ========== */
+    .modal-overlay {
+      display: none;
+      position: fixed;
+      inset: 0;
+      background: rgba(0,0,0,0.5);
+      z-index: 200;
+      align-items: center;
+      justify-content: center;
+    }
+    .modal-overlay.active { display: flex; }
+    .modal {
+      background: var(--card-bg);
+      border-radius: 12px;
+      padding: 36px;
+      max-width: 420px;
+      width: 90%;
+      position: relative;
+    }
+    .modal h3 { font-size: 1.15rem; margin-bottom: 16px; }
+    .modal-close {
+      position: absolute;
+      top: 12px;
+      right: 16px;
+      background: none;
+      border: none;
+      font-size: 1.5rem;
+      cursor: pointer;
+      color: var(--text-muted);
+    }
+    .modal label { display: block; font-size: 0.88rem; margin-bottom: 6px; font-weight: 700; }
+    .modal input[type="email"],
+    .modal input[type="text"],
+    .modal input[type="number"] {
+      width: 100%;
+      padding: 10px 14px;
+      border: 2px solid var(--border);
+      border-radius: 6px;
+      font-size: 0.95rem;
+      margin-bottom: 16px;
+      font-family: inherit;
+    }
+    .modal input:focus { border-color: var(--primary-light); outline: none; }
+    .modal .plan-summary {
+      background: #f1f5f9;
+      border-radius: 6px;
+      padding: 14px;
+      margin-bottom: 16px;
+      font-size: 0.88rem;
+    }
+    .modal .plan-summary strong { color: var(--primary); }
+    .modal .btn-submit {
+      width: 100%;
+      padding: 12px;
+      background: var(--primary-light);
+      color: #fff;
+      border: none;
+      border-radius: 6px;
+      font-size: 0.95rem;
+      font-weight: 700;
+      cursor: pointer;
+      transition: background 0.2s;
+      font-family: inherit;
+    }
+    .modal .btn-submit:hover { background: var(--primary); }
+    .modal .btn-submit:disabled { background: #94a3b8; cursor: not-allowed; }
+    .modal .error-msg {
+      color: #dc2626;
+      font-size: 0.85rem;
+      margin-bottom: 12px;
+      display: none;
+    }
+    .modal .note {
+      font-size: 0.78rem;
+      color: var(--text-muted);
+      margin-top: 14px;
+      text-align: center;
+    }
+    .btn-quote-link {
+      display: block;
+      margin-top: 8px;
+      font-size: 0.82rem;
+      color: var(--primary-light);
+      cursor: pointer;
+      border: none;
+      background: none;
+      font-family: inherit;
+      text-decoration: none;
+    }
+    .btn-quote-link:hover { text-decoration: underline; }
+
+    /* ========== FAQ ========== */
+    .faq-section { background: var(--bg-alt); }
+    .terms {
+      background: var(--card-bg);
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      padding: 32px;
+      max-width: 800px;
+      margin: 0 auto;
+    }
+    .terms h3 { font-size: 1rem; margin: 20px 0 8px; }
+    .terms h3:first-child { margin-top: 0; }
+    .terms p, .terms li { font-size: 0.88rem; color: var(--text-muted); }
+    .terms ul { padding-left: 20px; margin: 8px 0; }
+
+    /* ========== Tokushoho ========== */
+    .tokushoho-table {
+      width: 100%;
+      max-width: 800px;
+      margin: 0 auto;
+      border-collapse: collapse;
+      background: var(--card-bg);
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      overflow: hidden;
+    }
+    .tokushoho-table th,
+    .tokushoho-table td {
+      padding: 14px 20px;
+      font-size: 0.88rem;
+      text-align: left;
+      border-bottom: 1px solid var(--border);
+    }
+    .tokushoho-table tr:last-child th,
+    .tokushoho-table tr:last-child td { border-bottom: none; }
+    .tokushoho-table th {
+      background: var(--bg-alt);
+      color: var(--text);
+      font-weight: 500;
+      width: 180px;
+      white-space: nowrap;
+    }
+    .tokushoho-table td { color: var(--text-muted); }
+
+    /* ========== Footer ========== */
+    footer {
+      background: var(--bg);
+      color: var(--text-muted);
+      text-align: center;
+      padding: 28px;
+      font-size: 0.82rem;
+      border-top: 1px solid var(--border);
+    }
+
+    /* ========== Responsive ========== */
+    @media (max-width: 960px) {
+      .hero { padding: 48px 24px 40px; }
+      .steps-grid { grid-template-columns: 1fr 1fr; }
+      .specs-bar .container { flex-wrap: wrap; gap: 24px; }
+    }
+    @media (max-width: 768px) {
+      .container { padding: 0 20px; }
+      .features-grid { grid-template-columns: 1fr; }
+      .pricing-grid { grid-template-columns: 1fr; max-width: 360px; }
+      .pain-grid { grid-template-columns: 1fr; }
+      .steps-grid { grid-template-columns: 1fr; }
+      .hero h1 { font-size: 1.3rem; }
+      section { padding: 48px 0; }
+      nav .nav-links { gap: 14px; }
+      nav .nav-links a { font-size: 0.8rem; }
+      .product-compare { grid-template-columns: 1fr; }
+      .product-arrow { transform: rotate(90deg); }
+    }
+  </style>
+</head>
+<body>
+
+  <!-- ===== Navigation ===== -->
+  <nav>
+    <div class="container">
+      <a class="logo" href="#">BoringGeoDB</a>
+      <div class="nav-links">
+        <a href="#features">機能</a>
+        <a href="#download">ダウンロード</a>
+        <a href="#pricing">料金</a>
+        <a href="https://github.com/mipcivil/BoringGeoDB-releases" target="_blank" rel="noopener">GitHub</a>
+      </div>
+    </div>
+  </nav>
+
+  <!-- ===== Hero ===== -->
+  <div class="hero">
+    <div class="container">
+      <div class="hero-text">
+        <div class="hero-badges">
+          <span class="badge badge-platform">Windows 10/11 対応</span>
+          <span class="badge badge-beta">Beta</span>
+        </div>
+        <h1>BoringGeoDB</h1>
+        <p class="hero-subtitle">地質調査データベースソフト</p>
+        <p class="hero-desc">
+          複数のボーリングXMLを一括管理。地図表示・断面図・地盤モデル・納品データ生成まで、地質調査プロジェクトをひとつのアプリで完結できます。
+        </p>
+        <div class="hero-buttons">
+          <a class="btn btn-primary" href="https://github.com/mipcivil/BoringGeoDB-releases/releases/latest" target="_blank" rel="noopener">ダウンロード</a>
+          <a class="btn btn-outline" href="#features">機能を見る</a>
+        </div>
+        <div class="hero-version" id="heroVersion">
+          <a href="https://github.com/mipcivil/BoringGeoDB-releases/releases" target="_blank" rel="noopener">更新履歴</a>
+        </div>
+      </div>
+      <div class="hero-image">
+        <!-- スクリーンショットを追加したら src を変更 -->
+        <div style="width:100%;aspect-ratio:16/10;background:linear-gradient(135deg,#ccfbf1,#99f6e4);border-radius:8px;display:flex;align-items:center;justify-content:center;border:1px solid var(--border);box-shadow:0 4px 24px rgba(0,0,0,0.10);">
+          <span style="font-size:3rem;opacity:0.4;">🗺️</span>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ===== Specs Bar ===== -->
+  <div class="specs-bar">
+    <div class="container">
+      <div class="spec-item">
+        <div class="spec-icon">📂</div>
+        <span>複数XML一括管理</span>
+      </div>
+      <div class="spec-item">
+        <div class="spec-icon">🗺️</div>
+        <span>地図上でボーリング表示</span>
+      </div>
+      <div class="spec-item">
+        <div class="spec-icon">📐</div>
+        <span>断面図・地盤モデル</span>
+      </div>
+      <div class="spec-item">
+        <div class="spec-icon">📦</div>
+        <span>納品要領準拠出力</span>
+      </div>
+    </div>
+  </div>
+
+  <!-- ===== Pain Points ===== -->
+  <section class="pain-section">
+    <div class="container">
+      <div class="section-header">
+        <h2>こんなお悩みはありませんか？</h2>
+      </div>
+      <div class="pain-grid">
+        <div class="pain-item">
+          <div class="pain-icon">😰</div>
+          <div>
+            <h4>XMLファイルがバラバラ</h4>
+            <p>複数のボーリングデータを個別に管理していて、全体像が見えない。</p>
+          </div>
+        </div>
+        <div class="pain-item">
+          <div class="pain-icon">📋</div>
+          <div>
+            <h4>納品データの作成が大変</h4>
+            <p>納品要領に準拠したフォルダ構成やファイル命名を手作業で行っている。</p>
+          </div>
+        </div>
+        <div class="pain-item">
+          <div class="pain-icon">🔍</div>
+          <div>
+            <h4>断面図作成に時間がかかる</h4>
+            <p>ボーリング地点の選定から断面図生成までのワークフローが煩雑。</p>
+          </div>
+        </div>
+        <div class="pain-item">
+          <div class="pain-icon">💾</div>
+          <div>
+            <h4>データの整合性が不安</h4>
+            <p>コード値の誤りや必須項目の漏れが納品後に発覚する。</p>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ===== Features ===== -->
+  <section id="features">
+    <div class="container">
+      <div class="section-header">
+        <h2>主な機能</h2>
+        <p>プロジェクト単位のデータ管理から納品まで</p>
+      </div>
+      <div class="features-grid">
+        <div class="feature-card">
+          <div class="feature-icon">🗺️</div>
+          <h3>地図ビューでボーリング地点を一覧</h3>
+          <p>全ボーリング地点を地図上に表示。地図上のクリックで詳細パネルを開き、位置と地質情報を同時に確認できます。</p>
+        </div>
+        <div class="feature-card">
+          <div class="feature-icon">📐</div>
+          <h3>断面図の生成</h3>
+          <p>ボーリング地点を選択して地質断面図を自動生成。DXF・P21形式で出力し、CADソフトとも連携できます。</p>
+        </div>
+        <div class="feature-card">
+          <div class="feature-icon">🏗️</div>
+          <h3>地盤モデルの構築</h3>
+          <p>ボーリングデータから3D地盤モデルを構築。表層面の補間、基盤岩定義、断層の管理に対応。</p>
+        </div>
+        <div class="feature-card">
+          <div class="feature-icon">📦</div>
+          <h3>納品データの一括生成</h3>
+          <p>納品要領に準拠したフォルダ構成でBRG・GTST・データシートを一括生成。コード検証付きで手戻りを防止。</p>
+        </div>
+        <div class="feature-card">
+          <div class="feature-icon">💧</div>
+          <h3>地下水データの可視化</h3>
+          <p>地下水位の時系列チャートや等高線図で、水文データを直感的に把握・比較できます。</p>
+        </div>
+        <div class="feature-card">
+          <div class="feature-icon">💰</div>
+          <h3>積算・見積機能</h3>
+          <p>ボーリング情報から調査費用を自動積算。カスタム単価テーブルにも対応し、報告書用のレポートを生成できます。</p>
+        </div>
+        <div class="feature-card">
+          <div class="feature-icon">✏️</div>
+          <h3>XMLエディタ内蔵</h3>
+          <p>BoringXMLEditorを内蔵。データベースから直接XMLを開いて編集し、そのまま保存できます。</p>
+        </div>
+        <div class="feature-card">
+          <div class="feature-icon">🔍</div>
+          <h3>データ検索・クエリ実行</h3>
+          <p>SQLライクなクエリで複数ボーリングデータを横断検索。条件に合うデータを即座に抽出できます。</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ===== Relationship ===== -->
+  <section class="relationship-section">
+    <div class="container">
+      <div class="section-header">
+        <h2>BoringXMLEditorとの関係</h2>
+      </div>
+      <div class="relationship-card">
+        <div class="product-compare">
+          <div class="product-box">
+            <h4>BoringXMLEditor</h4>
+            <p>1ファイルずつXMLを編集<br>柱状図プレビュー・PDF/DXF出力</p>
+            <a href="https://mipcivil.github.io/BoringXMLTool-JP/" target="_blank" rel="noopener" style="font-size:0.82rem;color:var(--primary);">詳細 &rarr;</a>
+          </div>
+          <div class="product-arrow">+</div>
+          <div class="product-box active">
+            <h4>BoringGeoDB</h4>
+            <p>複数XMLの統合管理<br>地図・断面図・地盤モデル・納品生成</p>
+            <span style="font-size:0.82rem;color:var(--primary);font-weight:700;">エディタ内蔵</span>
+          </div>
+        </div>
+        <p style="text-align:center;margin-top:20px;font-size:0.85rem;color:var(--text-muted);">
+          BoringGeoDBにはBoringXMLEditorの全機能が含まれています。<br>個別にXMLを編集したい場合は、無料の BoringXMLEditor 単体でもお使いいただけます。
+        </p>
+      </div>
+    </div>
+  </section>
+
+  <!-- ===== How it works ===== -->
+  <section class="howto-section">
+    <div class="container">
+      <div class="section-header">
+        <h2>使い方</h2>
+      </div>
+      <div class="steps-grid">
+        <div class="step">
+          <div class="step-number">1</div>
+          <h3>ダウンロード</h3>
+          <p>ZIPファイルをダウンロードして展開します。インストール不要。</p>
+        </div>
+        <div class="step">
+          <div class="step-number">2</div>
+          <h3>プロジェクト作成</h3>
+          <p>納品要領準拠のフォルダを指定して、プロジェクトを作成します。</p>
+        </div>
+        <div class="step">
+          <div class="step-number">3</div>
+          <h3>XMLを読み込み</h3>
+          <p>ボーリングXMLをまとめて読み込み。地図上に自動配置されます。</p>
+        </div>
+        <div class="step">
+          <div class="step-number">4</div>
+          <h3>分析・納品</h3>
+          <p>断面図や地盤モデルを生成し、納品データを一括出力します。</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ===== Download ===== -->
+  <section id="download">
+    <div class="container">
+      <div class="section-header">
+        <h2>ダウンロード</h2>
+      </div>
+      <div class="download-card">
+        <h3>BoringGeoDB for Windows <span style="font-size: 0.72rem; background: #fef3c7; color: #92400e; padding: 2px 8px; border-radius: 4px; vertical-align: middle;">Beta</span></h3>
+        <p class="download-info">ZIPを展開して <code>BoringGeoDB.exe</code> を起動するだけで使えます。</p>
+        <a class="btn btn-primary" href="https://github.com/mipcivil/BoringGeoDB-releases/releases/latest" target="_blank" rel="noopener">最新版をダウンロード</a>
+        <div class="download-meta">
+          <span>Windows 10/11 (64-bit)</span>
+          <span>ZIP配布</span>
+        </div>
+      </div>
+      <p style="text-align: center; margin-top: 16px; font-size: 0.85rem; color: var(--text-muted);">
+        過去のバージョンは <a href="https://github.com/mipcivil/BoringGeoDB-releases/releases" target="_blank" rel="noopener" style="color: var(--primary-light);">リリース一覧</a> から確認できます。
+      </p>
+    </div>
+  </section>
+
+  <!-- ===== Pricing ===== -->
+  <section id="pricing">
+    <div class="container">
+      <div class="section-header">
+        <h2>無料版と有料版</h2>
+      </div>
+      <div class="pricing-grid">
+        <div class="pricing-card free">
+          <div class="plan-name">無料版</div>
+          <div class="price" style="font-size: 1.8rem;">&yen;0</div>
+          <div class="period">ずっと無料</div>
+          <ul>
+            <li class="yes">XML読み込み・地図表示</li>
+            <li class="yes">ボーリング一覧・詳細表示</li>
+            <li class="yes">XMLエディタ（基本機能）</li>
+            <li class="yes">柱状図プレビュー・PDF出力</li>
+            <li class="no">断面図・地盤モデル</li>
+            <li class="no">納品データ生成</li>
+            <li class="no">積算・見積機能</li>
+            <li class="no">クエリ実行・一括検索</li>
+          </ul>
+          <a class="btn btn-green" href="https://github.com/mipcivil/BoringGeoDB-releases/releases/latest" target="_blank" rel="noopener" style="width: 100%; text-align: center; padding: 10px 16px; font-size: 0.88rem;">ダウンロード</a>
+        </div>
+        <div class="pricing-card featured">
+          <div class="plan-name">有料版</div>
+          <div class="price">&yen;5,000</div>
+          <div class="period">/ 月（税込）　or　&yen;54,000 / 年</div>
+          <ul>
+            <li class="yes">無料版のすべての機能</li>
+            <li class="yes">断面図生成（DXF/P21）</li>
+            <li class="yes">3D地盤モデル構築</li>
+            <li class="yes">納品データ一括生成</li>
+            <li class="yes">積算・見積レポート</li>
+            <li class="yes">クエリ実行・データ検索</li>
+            <li class="yes">XMLエディタ有料機能</li>
+          </ul>
+          <p style="font-size: 0.78rem; color: var(--text-muted);">
+            いつでもキャンセル可。アプリ内からも購入できます。
+          </p>
+          <button class="btn btn-teal" style="width: 100%; margin-top: 12px; padding: 10px 16px; font-size: 0.88rem;" onclick="openPurchase('monthly')">月額で購入</button>
+          <button class="btn-quote-link" onclick="openPurchase('yearly')">年額で購入</button>
+          <button class="btn-quote-link" onclick="openQuote('monthly')">見積書をダウンロード &rarr;</button>
+          <button class="btn-quote-link" onclick="openBankOrder('monthly')" style="color: var(--primary); margin-top: 4px;">銀行振込で発注する &rarr;</button>
+        </div>
+      </div>
+      <p style="text-align: center; margin-top: 20px; font-size: 0.82rem; color: var(--text-muted);">
+        ※ ベータ版のため、正式リリース時に価格が変更される場合があります。
+      </p>
+    </div>
+  </section>
+
+  <!-- ===== Manage Subscription ===== -->
+  <section id="manage" style="padding: 48px 0;">
+    <div class="container">
+      <div class="section-header">
+        <h2>サブスクリプション管理</h2>
+      </div>
+      <div class="manage-sub">
+        <p>クレジットカード決済でご購入の方は、購入時のメールアドレスを入力してください。<br>Stripe のポータルで、プラン変更・キャンセル・支払い方法の更新ができます。</p>
+        <p style="font-size: 0.8rem; color: var(--text-muted); margin-bottom: 0;">※ 銀行振込でご購入の方は自動更新されません。キャンセルをご希望の場合は、次回の振込を行わないでください。</p>
+        <input type="email" id="manageEmail" placeholder="your@email.com" autocomplete="email">
+        <div class="manage-error" id="manageError"></div>
+        <button class="btn-manage" id="manageBtn" onclick="openPortal()">管理画面を開く</button>
+        <p class="manage-note">Stripe の安全なポータルにリダイレクトされます。</p>
+      </div>
+    </div>
+  </section>
+
+  <!-- ===== FAQ ===== -->
+  <section id="faq" class="faq-section">
+    <div class="container">
+      <div class="section-header">
+        <h2>よくある質問</h2>
+      </div>
+      <div class="terms" style="max-width: 680px;">
+        <p><strong>Q. BoringXMLEditorとの違いは何ですか？</strong><br>BoringXMLEditorは1ファイルずつのXML編集に特化しています。BoringGeoDBはそのエディタ機能を内蔵しつつ、複数XMLの統合管理・地図表示・断面図・地盤モデル・納品データ生成などのプロジェクト管理機能を追加したソフトです。</p>
+        <p style="margin-top: 16px;"><strong>Q. BoringXMLEditorのライセンスも必要ですか？</strong><br>いいえ。BoringGeoDBのライセンスにはエディタの有料機能（DXF出力等）も含まれています。別途購入は不要です。</p>
+        <p style="margin-top: 16px;"><strong>Q. 無料版でどこまで使えますか？</strong><br>XMLの読み込み・地図表示・ボーリング一覧・柱状図PDF出力が使えます。断面図・地盤モデル・納品データ生成は有料版です。</p>
+        <p style="margin-top: 16px;"><strong>Q. インストールは必要ですか？</strong><br>不要です。ZIPを展開するだけで使えます。レジストリへの書き込みもありません。</p>
+        <p style="margin-top: 16px;"><strong>Q. ライセンスはPC何台まで？</strong><br>1台に紐づきます。別のPCで使う場合は、新しいPCでライセンスキーを入力するだけで自動的に移行されます。旧PCのライセンスは無効になります。</p>
+        <p style="margin-top: 16px;"><strong>Q. サブスクリプションは解約できますか？</strong><br>いつでもキャンセルできます。<a href="#manage" style="color: var(--primary-light);">サブスクリプション管理</a>からお手続きください。現在の請求期間の終了まで使えます。</p>
+        <p style="margin-top: 16px;"><strong>Q. 対応しているDTDバージョンは？</strong><br>DTD 2.10 / 3.00 / 4.00 に対応しています。バージョンは自動判定されます。</p>
+      </div>
+    </div>
+  </section>
+
+  <!-- ===== Terms ===== -->
+  <section id="terms">
+    <div class="container">
+      <div class="section-header">
+        <h2>利用規約・返金ポリシー</h2>
+      </div>
+      <div class="terms">
+        <h3>サービス概要</h3>
+        <p>BoringGeoDB（以下「本ソフトウェア」）は、地質調査データの統合管理を目的としたデスクトップアプリケーションです。月額または年額のサブスクリプション方式でライセンスを提供します。</p>
+
+        <h3>ライセンス</h3>
+        <ul>
+          <li>ライセンスは購入者のマシン1台に紐づきます。</li>
+          <li>サブスクリプションは選択したプランに応じて月単位または年単位で自動更新されます。</li>
+        </ul>
+
+        <h3>支払い</h3>
+        <ul>
+          <li>クレジットカード決済は Stripe を通じて安全に処理されます。購入時に即座に請求され、以降はプランに応じて毎月または毎年自動課金されます。</li>
+          <li>銀行振込の場合、注文後14日以内にお振込みください。入金確認後、ライセンスキーをメールで発行します。</li>
+          <li>価格は予告なく変更される場合があります。既存のサブスクリプションには次回更新時から適用されます。</li>
+        </ul>
+
+        <h3>キャンセル・返金ポリシー</h3>
+        <ul>
+          <li>サブスクリプションはいつでもキャンセル可能です。</li>
+          <li>キャンセル後も、現在の請求期間の終了まで本ソフトウェアをご利用いただけます。</li>
+          <li>購入後7日以内で、かつ本ソフトウェアの重大な不具合により利用できない場合に限り、返金をご相談いただけます。</li>
+          <li>返金のご相談は <a href="mailto:info@strataworks.dev" style="color: var(--primary-light);">info@strataworks.dev</a> までお問い合わせください。</li>
+        </ul>
+
+        <h3>免責事項</h3>
+        <ul>
+          <li>本ソフトウェアは「現状有姿」で提供され、特定目的への適合性を保証するものではありません。</li>
+          <li>本ソフトウェアの使用により生じた損害について、StrataWorks は一切の責任を負いません。</li>
+        </ul>
+      </div>
+    </div>
+  </section>
+
+  <!-- ===== 特定商取引法モーダル ===== -->
+  <div class="modal-overlay" id="tokushohoModal">
+    <div class="modal" style="max-width: 600px;">
+      <button class="modal-close" onclick="closeTokushoho()">&times;</button>
+      <h3>特定商取引法に基づく表記</h3>
+      <table class="tokushoho-table">
+        <tr><th>販売事業者</th><td>葉　嘉瑤</td></tr>
+        <tr><th>所在地</th><td>〒450-0002 愛知県名古屋市中村区名駅4丁目24番5号 第2森ビル401</td></tr>
+        <tr><th>電話番号</th><td>請求があれば遅滞なく開示いたします</td></tr>
+        <tr><th>連絡先</th><td><a href="mailto:info@strataworks.dev" style="color: var(--primary-light);">info@strataworks.dev</a></td></tr>
+        <tr><th>販売価格</th><td>月額プラン: 5,000円（税込） / 年額プラン: 54,000円（税込）<br>※価格は予告なく変更される場合があります</td></tr>
+        <tr><th>販売価格以外の必要料金</th><td>なし（インターネット接続に必要な通信費はお客様のご負担となります）</td></tr>
+        <tr><th>支払方法</th><td>クレジットカード決済（Stripe経由）、銀行振込</td></tr>
+        <tr><th>支払時期</th><td>クレジットカード: 購入時に即時決済、以降自動課金<br>銀行振込: 注文後14日以内にお振込み</td></tr>
+        <tr><th>商品の引渡時期</th><td>クレジットカード: 決済完了後、即時発行<br>銀行振込: 入金確認後、1〜2営業日以内にメールで発行</td></tr>
+        <tr><th>返品・キャンセル</th><td>サブスクリプションはいつでもキャンセル可能です。キャンセル後も現在の請求期間終了まで利用できます。購入後7日以内で重大な不具合により利用できない場合に限り、返金をご相談いただけます。</td></tr>
+        <tr><th>動作環境</th><td>Windows 10 / 11（64bit）</td></tr>
+      </table>
+    </div>
+  </div>
+
+  <!-- ===== Purchase Modal ===== -->
+  <div class="modal-overlay" id="purchaseModal">
+    <div class="modal">
+      <button class="modal-close" onclick="closePurchase()">&times;</button>
+      <h3>ライセンス購入</h3>
+      <div class="plan-summary" id="planSummary"></div>
+      <div class="error-msg" id="purchaseError"></div>
+      <label for="purchaseEmail">メールアドレス</label>
+      <input type="email" id="purchaseEmail" placeholder="your@email.com" autocomplete="email">
+      <button class="btn-submit" id="purchaseSubmit" onclick="submitPurchase()">Stripe で購入手続きへ</button>
+      <p class="note">決済は Stripe で安全に処理されます。<br>購入後、ライセンスキーがメールで届きます。</p>
+    </div>
+  </div>
+
+  <!-- ===== Quote Modal ===== -->
+  <div class="modal-overlay" id="quoteModal">
+    <div class="modal" style="max-width: 480px;">
+      <button class="modal-close" onclick="closeQuote()">&times;</button>
+      <h3>見積書ダウンロード</h3>
+      <div class="plan-summary" id="quotePlanSummary"></div>
+      <div class="error-msg" id="quoteError"></div>
+      <label for="quoteCompany">宛名（会社名・団体名） <span style="color: #dc2626;">*</span></label>
+      <input type="text" id="quoteCompany" placeholder="株式会社○○○○">
+      <label for="quotePerson">ご担当者名（任意）</label>
+      <input type="text" id="quotePerson" placeholder="山田 太郎">
+      <label for="quoteQuantity">ライセンス数</label>
+      <input type="number" id="quoteQuantity" value="1" min="1" max="100">
+      <button class="btn-submit" id="quoteSubmit" onclick="generateQuote()">見積書をPDFで発行</button>
+      <p class="note">PDFファイルとして即時ダウンロードされます。<br>有効期限は発行日から30日間です。</p>
+    </div>
+  </div>
+
+  <!-- ===== Bank Transfer Order Modal ===== -->
+  <div class="modal-overlay" id="bankOrderModal">
+    <div class="modal" style="max-width: 520px;">
+      <button class="modal-close" onclick="closeBankOrder()">&times;</button>
+      <h3>銀行振込で発注</h3>
+      <div class="plan-summary" id="bankOrderPlanSummary"></div>
+      <div class="error-msg" id="bankOrderError"></div>
+      <label for="bankOrderCompany">会社名・団体名 <span style="color: #dc2626;">*</span></label>
+      <input type="text" id="bankOrderCompany" placeholder="株式会社○○○○">
+      <label for="bankOrderPerson">ご担当者名 <span style="color: #dc2626;">*</span></label>
+      <input type="text" id="bankOrderPerson" placeholder="山田 太郎">
+      <label for="bankOrderEmail">メールアドレス <span style="color: #dc2626;">*</span></label>
+      <input type="email" id="bankOrderEmail" placeholder="your@email.com" autocomplete="email">
+      <label for="bankOrderPhone">電話番号（任意）</label>
+      <input type="tel" id="bankOrderPhone" placeholder="03-1234-5678">
+      <label for="bankOrderQuoteNo">見積書番号（任意）</label>
+      <input type="text" id="bankOrderQuoteNo" placeholder="Q-20260323-0001">
+      <div style="display: flex; gap: 12px; align-items: end;">
+        <div style="flex: 1;">
+          <label for="bankOrderPlan">プラン <span style="color: #dc2626;">*</span></label>
+          <select id="bankOrderPlan" style="width: 100%; padding: 8px 12px; border: 1px solid var(--border); border-radius: 6px; font-size: 14px;">
+            <option value="monthly">月額 ¥5,000/月</option>
+            <option value="yearly">年額 ¥54,000/年</option>
+          </select>
+        </div>
+        <div style="width: 100px;">
+          <label for="bankOrderQuantity">数量</label>
+          <input type="number" id="bankOrderQuantity" value="1" min="1" max="100" style="text-align: center;">
+        </div>
+      </div>
+      <div id="bankOrderTotal" style="text-align: right; font-size: 1.1rem; font-weight: 700; color: var(--primary); margin: 12px 0;">合計: ¥5,000</div>
+      <div id="bankOrderTurnstile" style="margin: 12px 0;"></div>
+      <button class="btn-submit" id="bankOrderSubmit" onclick="submitBankOrder()">発注する</button>
+      <p class="note">発注後、振込先情報をメールでお送りします。<br>入金確認後、ライセンスキーをメールで発行します。</p>
+    </div>
+  </div>
+
+  <!-- ===== Footer ===== -->
+  <footer>
+    <p>
+      BoringGeoDB &mdash;
+      <a href="https://mipcivil.github.io/BoringXMLTool-JP/" style="color: var(--text-muted);">BoringXMLEditor</a> |
+      <a href="mailto:info@strataworks.dev" style="color: var(--text-muted);">不具合報告・質問</a> |
+      <a href="#" onclick="openTokushoho(); return false;" style="color: var(--text-muted);">特定商取引法に基づく表記</a>
+    </p>
+  </footer>
+
+  <script>
+    // GitHub APIから最新バージョンを取得
+    fetch("https://api.github.com/repos/mipcivil/BoringGeoDB-releases/releases/latest")
+      .then(function(r) { return r.json(); })
+      .then(function(data) {
+        if (data.tag_name) {
+          var el = document.getElementById("heroVersion");
+          var date = data.published_at ? data.published_at.slice(0, 10) : "";
+          el.insertAdjacentHTML("afterbegin", data.tag_name + (date ? " (" + date + ")" : "") + " — ");
+        }
+      })
+      .catch(function() {});
+
+    var API_URL = "https://boringxml-license-api.miaipwork.workers.dev";
+    var selectedPlan = "monthly";
+    var PRODUCT = "geodb";
+
+    // ── 購入モーダル ──
+    function openPurchase(plan) {
+      selectedPlan = plan;
+      var label = plan === "yearly" ? "年額プラン: ¥54,000 / 年（税込）" : "月額プラン: ¥5,000 / 月（税込）";
+      document.getElementById("planSummary").innerHTML = "プラン: <strong>" + label + "</strong>";
+      document.getElementById("purchaseError").style.display = "none";
+      document.getElementById("purchaseEmail").value = "";
+      document.getElementById("purchaseSubmit").disabled = false;
+      document.getElementById("purchaseSubmit").textContent = "Stripe で購入手続きへ";
+      document.getElementById("purchaseModal").classList.add("active");
+    }
+
+    function closePurchase() {
+      document.getElementById("purchaseModal").classList.remove("active");
+    }
+
+    document.getElementById("purchaseModal").addEventListener("click", function(e) {
+      if (e.target === this) closePurchase();
+    });
+
+    function submitPurchase() {
+      var email = document.getElementById("purchaseEmail").value.trim();
+      var errorEl = document.getElementById("purchaseError");
+      var submitBtn = document.getElementById("purchaseSubmit");
+
+      if (!email || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
+        errorEl.textContent = "有効なメールアドレスを入力してください。";
+        errorEl.style.display = "block";
+        return;
+      }
+
+      errorEl.style.display = "none";
+      submitBtn.disabled = true;
+      submitBtn.textContent = "処理中...";
+
+      fetch(API_URL + "/api/checkout", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ email: email, plan: selectedPlan, product: PRODUCT })
+      })
+        .then(function(res) { return res.json().then(function(d) { return { ok: res.ok, data: d }; }); })
+        .then(function(result) {
+          if (result.ok && result.data.checkout_url) {
+            window.location.href = result.data.checkout_url;
+          } else {
+            throw new Error(result.data.error || "エラーが発生しました。");
+          }
+        })
+        .catch(function(err) {
+          errorEl.textContent = err.message || "通信エラーが発生しました。しばらくしてから再度お試しください。";
+          errorEl.style.display = "block";
+          submitBtn.disabled = false;
+          submitBtn.textContent = "Stripe で購入手続きへ";
+        });
+    }
+
+    document.getElementById("purchaseEmail").addEventListener("keydown", function(e) {
+      if (e.key === "Enter") submitPurchase();
+    });
+
+    // ── サブスクリプション管理 ──
+    function openPortal() {
+      var email = document.getElementById("manageEmail").value.trim();
+      var errorEl = document.getElementById("manageError");
+      var btn = document.getElementById("manageBtn");
+      errorEl.textContent = "";
+
+      if (!email || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
+        errorEl.textContent = "有効なメールアドレスを入力してください。";
+        return;
+      }
+
+      btn.disabled = true;
+      btn.textContent = "読み込み中...";
+
+      fetch(API_URL + "/api/portal", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ email: email })
+      })
+      .then(function(res) {
+        if (!res.ok) {
+          return res.json().then(function(d) { throw new Error(d.error || "エラーが発生しました。"); });
+        }
+        return res.json();
+      })
+      .then(function(data) {
+        if (data.portal_url) {
+          window.location.href = data.portal_url;
+        }
+      })
+      .catch(function(err) {
+        errorEl.textContent = err.message || "サーバーに接続できません。";
+      })
+      .finally(function() {
+        btn.disabled = false;
+        btn.textContent = "管理画面を開く";
+      });
+    }
+
+    // ── 特定商取引法 ──
+    function openTokushoho() {
+      document.getElementById("tokushohoModal").classList.add("active");
+    }
+    function closeTokushoho() {
+      document.getElementById("tokushohoModal").classList.remove("active");
+    }
+    document.getElementById("tokushohoModal").addEventListener("click", function(e) {
+      if (e.target === this) closeTokushoho();
+    });
+
+    // ── 銀行振込発注モーダル ──
+    var bankOrderPlan = "monthly";
+    var turnstileSiteKey = "0x4AAAAAABB_placeholder";
+    var turnstileWidgetId = null;
+    var turnstileToken = null;
+
+    function openBankOrder(plan) {
+      bankOrderPlan = plan;
+      document.getElementById("bankOrderPlan").value = plan;
+      document.getElementById("bankOrderError").style.display = "none";
+      document.getElementById("bankOrderCompany").value = "";
+      document.getElementById("bankOrderPerson").value = "";
+      document.getElementById("bankOrderEmail").value = "";
+      document.getElementById("bankOrderPhone").value = "";
+      document.getElementById("bankOrderQuoteNo").value = "";
+      document.getElementById("bankOrderQuantity").value = "1";
+      document.getElementById("bankOrderSubmit").disabled = false;
+      document.getElementById("bankOrderSubmit").textContent = "発注する";
+      turnstileToken = null;
+      updateBankOrderTotal();
+      document.getElementById("bankOrderModal").classList.add("active");
+      var container = document.getElementById("bankOrderTurnstile");
+      container.innerHTML = "";
+      if (typeof turnstile !== "undefined" && turnstileSiteKey.indexOf("placeholder") === -1) {
+        turnstileWidgetId = turnstile.render(container, {
+          sitekey: turnstileSiteKey,
+          theme: "light",
+          callback: function(token) { turnstileToken = token; }
+        });
+      }
+    }
+
+    function closeBankOrder() {
+      document.getElementById("bankOrderModal").classList.remove("active");
+    }
+
+    document.getElementById("bankOrderModal").addEventListener("click", function(e) {
+      if (e.target === this) closeBankOrder();
+    });
+
+    function updateBankOrderTotal() {
+      var plan = document.getElementById("bankOrderPlan").value;
+      var qty = parseInt(document.getElementById("bankOrderQuantity").value) || 1;
+      var unitPrice = plan === "yearly" ? 54000 : 5000;
+      var total = unitPrice * qty;
+      var label = plan === "yearly"
+        ? "年額プラン: ¥54,000 / 年（税込）"
+        : "月額プラン: ¥5,000 / 月（税込）";
+      document.getElementById("bankOrderPlanSummary").innerHTML = "プラン: <strong>" + label + "</strong>";
+      document.getElementById("bankOrderTotal").textContent = "合計: ¥" + total.toLocaleString();
+    }
+
+    document.getElementById("bankOrderPlan").addEventListener("change", updateBankOrderTotal);
+    document.getElementById("bankOrderQuantity").addEventListener("input", updateBankOrderTotal);
+
+    function submitBankOrder() {
+      var company = document.getElementById("bankOrderCompany").value.trim();
+      var person = document.getElementById("bankOrderPerson").value.trim();
+      var email = document.getElementById("bankOrderEmail").value.trim();
+      var phone = document.getElementById("bankOrderPhone").value.trim();
+      var quoteNo = document.getElementById("bankOrderQuoteNo").value.trim();
+      var plan = document.getElementById("bankOrderPlan").value;
+      var quantity = parseInt(document.getElementById("bankOrderQuantity").value) || 1;
+      var errorEl = document.getElementById("bankOrderError");
+      var submitBtn = document.getElementById("bankOrderSubmit");
+
+      if (!company) {
+        errorEl.textContent = "会社名・団体名を入力してください。";
+        errorEl.style.display = "block";
+        return;
+      }
+      if (!person) {
+        errorEl.textContent = "ご担当者名を入力してください。";
+        errorEl.style.display = "block";
+        return;
+      }
+      if (!email || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
+        errorEl.textContent = "有効なメールアドレスを入力してください。";
+        errorEl.style.display = "block";
+        return;
+      }
+
+      errorEl.style.display = "none";
+      submitBtn.disabled = true;
+      submitBtn.textContent = "送信中...";
+
+      fetch(API_URL + "/api/order", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          company: company,
+          person: person,
+          email: email,
+          phone: phone || undefined,
+          plan: plan,
+          quantity: quantity,
+          product: PRODUCT,
+          quote_number: quoteNo || undefined,
+          turnstile_token: turnstileToken || undefined
+        })
+      })
+      .then(function(res) { return res.json().then(function(d) { return { ok: res.ok, data: d }; }); })
+      .then(function(result) {
+        if (result.ok) {
+          var modal = document.getElementById("bankOrderModal").querySelector(".modal");
+          modal.innerHTML = '<button class="modal-close" onclick="closeBankOrder()">&times;</button>'
+            + '<div style="text-align: center; padding: 20px 0;">'
+            + '<div style="font-size: 48px; margin-bottom: 16px;">&#x2705;</div>'
+            + '<h3>ご注文を受け付けました</h3>'
+            + '<p style="margin: 16px 0;">注文番号: <strong style="font-family: monospace; font-size: 1.1rem; color: var(--primary);">' + result.data.order_number + '</strong></p>'
+            + '<p>振込先情報を <strong>' + email + '</strong> にお送りしました。</p>'
+            + '<p style="font-size: 0.85rem; color: var(--text-muted); margin-top: 12px;">入金確認後、ライセンスキーをメールでお届けします。</p>'
+            + '<button class="btn-submit" onclick="closeBankOrder()" style="margin-top: 20px;">閉じる</button>'
+            + '</div>';
+        } else {
+          throw new Error(result.data.error || "エラーが発生しました。");
+        }
+      })
+      .catch(function(err) {
+        errorEl.textContent = err.message || "通信エラーが発生しました。しばらくしてから再度お試しください。";
+        errorEl.style.display = "block";
+        submitBtn.disabled = false;
+        submitBtn.textContent = "発注する";
+      });
+    }
+
+    // ── Escape キー ──
+    document.addEventListener("keydown", function(e) {
+      if (e.key === "Escape") {
+        closePurchase();
+        closeTokushoho();
+        closeBankOrder();
+        closeQuote();
+      }
+    });
+  </script>
+
+  <script src="https://challenges.cloudflare.com/turnstile/v0/api.js?render=explicit" async defer></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
+  <script>
+    var quotePlan = "monthly";
+
+    function openQuote(plan) {
+      quotePlan = plan;
+      var label = plan === "yearly"
+        ? "年額プラン: &yen;54,000 / 年（税込）"
+        : "月額プラン: &yen;5,000 / 月（税込）";
+      document.getElementById("quotePlanSummary").innerHTML = "プラン: <strong>" + label + "</strong>";
+      document.getElementById("quoteError").style.display = "none";
+      document.getElementById("quoteCompany").value = "";
+      document.getElementById("quotePerson").value = "";
+      document.getElementById("quoteQuantity").value = "1";
+      document.getElementById("quoteSubmit").disabled = false;
+      document.getElementById("quoteSubmit").textContent = "見積書をPDFで発行";
+      document.getElementById("quoteModal").classList.add("active");
+    }
+
+    function closeQuote() {
+      document.getElementById("quoteModal").classList.remove("active");
+    }
+
+    document.getElementById("quoteModal").addEventListener("click", function(e) {
+      if (e.target === this) closeQuote();
+    });
+
+    function formatDateJP(date) {
+      return date.getFullYear() + "\u5E74" + (date.getMonth() + 1) + "\u6708" + date.getDate() + "\u65E5";
+    }
+
+    function generateQuoteNumber() {
+      var now = new Date();
+      var y = now.getFullYear();
+      var m = String(now.getMonth() + 1).padStart(2, "0");
+      var d = String(now.getDate()).padStart(2, "0");
+      var rand = String(Math.floor(Math.random() * 10000)).padStart(4, "0");
+      return "Q-" + y + m + d + "-" + rand;
+    }
+
+    function escapeHTML(str) {
+      var div = document.createElement("div");
+      div.textContent = str;
+      return div.innerHTML;
+    }
+
+    function generateQuote() {
+      var company = document.getElementById("quoteCompany").value.trim();
+      var person = document.getElementById("quotePerson").value.trim();
+      var quantity = parseInt(document.getElementById("quoteQuantity").value) || 1;
+      var errorEl = document.getElementById("quoteError");
+      var submitBtn = document.getElementById("quoteSubmit");
+
+      if (!company) {
+        errorEl.textContent = "\u5B9B\u540D\uFF08\u4F1A\u793E\u540D\u30FB\u56E3\u4F53\u540D\uFF09\u3092\u5165\u529B\u3057\u3066\u304F\u3060\u3055\u3044\u3002";
+        errorEl.style.display = "block";
+        return;
+      }
+      if (quantity < 1 || quantity > 100) {
+        errorEl.textContent = "\u30E9\u30A4\u30BB\u30F3\u30B9\u6570\u306F1\u301C100\u306E\u7BC4\u56F2\u3067\u5165\u529B\u3057\u3066\u304F\u3060\u3055\u3044\u3002";
+        errorEl.style.display = "block";
+        return;
+      }
+
+      errorEl.style.display = "none";
+      submitBtn.disabled = true;
+      submitBtn.textContent = "PDF\u751F\u6210\u4E2D...";
+
+      var unitPrice = quotePlan === "yearly" ? 54000 : 5000;
+      var planLabel = quotePlan === "yearly" ? "\u5E74\u984D\u30E9\u30A4\u30BB\u30F3\u30B9" : "\u6708\u984D\u30E9\u30A4\u30BB\u30F3\u30B9";
+      var periodLabel = quotePlan === "yearly" ? "/ \u5E74" : "/ \u6708";
+
+      var now = new Date();
+      var validDate = new Date(now);
+      validDate.setDate(validDate.getDate() + 30);
+
+      var quoteNo = generateQuoteNumber();
+      var amount = unitPrice * quantity;
+      var internalTax = Math.floor(amount * 10 / 110);
+
+      var html = buildEstimateHTML({
+        company: company,
+        person: person,
+        planLabel: planLabel,
+        periodLabel: periodLabel,
+        unitPrice: unitPrice,
+        quantity: quantity,
+        amount: amount,
+        internalTax: internalTax,
+        quoteNo: quoteNo,
+        issueDate: formatDateJP(now),
+        validDate: formatDateJP(validDate)
+      });
+
+      var container = document.createElement("div");
+      container.innerHTML = html;
+      container.style.position = "absolute";
+      container.style.left = "-9999px";
+      container.style.top = "0";
+      document.body.appendChild(container);
+
+      var opt = {
+        margin: 0,
+        filename: "\u898B\u7A4D\u66F8_" + quoteNo + ".pdf",
+        image: { type: "jpeg", quality: 0.98 },
+        html2canvas: { scale: 2, useCORS: true, logging: false },
+        jsPDF: { unit: "mm", format: "a4", orientation: "portrait" }
+      };
+
+      html2pdf().set(opt).from(container.firstElementChild).save().then(function() {
+        document.body.removeChild(container);
+        submitBtn.disabled = false;
+        submitBtn.textContent = "\u898B\u7A4D\u66F8\u3092PDF\u3067\u767A\u884C";
+        closeQuote();
+      }).catch(function() {
+        document.body.removeChild(container);
+        errorEl.textContent = "PDF\u751F\u6210\u4E2D\u306B\u30A8\u30E9\u30FC\u304C\u767A\u751F\u3057\u307E\u3057\u305F\u3002";
+        errorEl.style.display = "block";
+        submitBtn.disabled = false;
+        submitBtn.textContent = "\u898B\u7A4D\u66F8\u3092PDF\u3067\u767A\u884C";
+      });
+    }
+
+    function buildEstimateHTML(d) {
+      var n = function(v) { return v.toLocaleString(); };
+      var e = escapeHTML;
+      return ''
+        + '<div style="width:210mm;min-height:297mm;padding:18mm 22mm;font-family:Noto Sans JP,sans-serif;font-size:10.5pt;color:#1e293b;line-height:1.8;background:#fff;">'
+        + '<h1 style="text-align:center;font-size:22pt;font-weight:700;margin:0 0 3mm;letter-spacing:0.5em;">\u898B \u7A4D \u66F8</h1>'
+        + '<hr style="border:none;border-top:3px double #0f766e;margin:0 0 10mm;">'
+        + '<table style="width:100%;margin-bottom:10mm;border-collapse:collapse;"><tr>'
+        + '<td style="vertical-align:top;width:55%;padding:0;">'
+        + '<p style="font-size:14pt;font-weight:700;margin:0 0 1mm;border-bottom:2px solid #1e293b;display:inline-block;padding-bottom:1mm;">' + e(d.company) + ' \u5FA1\u4E2D</p>'
+        + (d.person ? '<p style="margin:3mm 0 0;font-size:9.5pt;">\u3054\u62C5\u5F53: ' + e(d.person) + ' \u69D8</p>' : '')
+        + '</td>'
+        + '<td style="vertical-align:top;text-align:right;font-size:9pt;padding:0;">'
+        + '<p style="margin:0;">\u898B\u7A4D\u66F8\u756A\u53F7: ' + d.quoteNo + '</p>'
+        + '<p style="margin:0;">\u767A\u884C\u65E5: ' + d.issueDate + '</p>'
+        + '<p style="margin:0;">\u6709\u52B9\u671F\u9650: ' + d.validDate + '</p>'
+        + '</td>'
+        + '</tr></table>'
+        + '<div style="background:#f0fdfa;border:2px solid #0f766e;border-radius:4px;padding:5mm 8mm;margin-bottom:10mm;text-align:center;">'
+        + '<p style="font-size:9pt;color:#5a6577;margin:0 0 1mm;">\u5408\u8A08\u91D1\u984D\uFF08\u7A0E\u8FBC\uFF09</p>'
+        + '<p style="font-size:22pt;font-weight:700;color:#0f766e;margin:0;">&yen;' + n(d.amount) + '</p>'
+        + '</div>'
+        + '<table style="width:100%;border-collapse:collapse;margin-bottom:4mm;">'
+        + '<thead><tr style="background:#0f766e;color:#fff;">'
+        + '<th style="padding:2.5mm 4mm;text-align:left;font-size:9pt;font-weight:700;">\u54C1\u540D</th>'
+        + '<th style="padding:2.5mm 4mm;text-align:center;font-size:9pt;font-weight:700;width:12%;">\u6570\u91CF</th>'
+        + '<th style="padding:2.5mm 4mm;text-align:right;font-size:9pt;font-weight:700;width:20%;">\u5358\u4FA1\uFF08\u7A0E\u8FBC\uFF09</th>'
+        + '<th style="padding:2.5mm 4mm;text-align:right;font-size:9pt;font-weight:700;width:20%;">\u91D1\u984D\uFF08\u7A0E\u8FBC\uFF09</th>'
+        + '</tr></thead>'
+        + '<tbody>'
+        + '<tr style="border-bottom:1px solid #dde3ea;">'
+        + '<td style="padding:3mm 4mm;font-size:10pt;">BoringGeoDB ' + e(d.planLabel) + '</td>'
+        + '<td style="padding:3mm 4mm;text-align:center;">' + d.quantity + '</td>'
+        + '<td style="padding:3mm 4mm;text-align:right;">&yen;' + n(d.unitPrice) + ' ' + e(d.periodLabel) + '</td>'
+        + '<td style="padding:3mm 4mm;text-align:right;">&yen;' + n(d.amount) + '</td>'
+        + '</tr>'
+        + '</tbody></table>'
+        + '<table style="margin-left:auto;border-collapse:collapse;width:42%;margin-bottom:12mm;">'
+        + '<tr style="border-bottom:1px solid #dde3ea;"><td style="padding:2mm 4mm;font-size:9pt;">\u5408\u8A08\uFF08\u7A0E\u8FBC\uFF09</td><td style="padding:2mm 4mm;text-align:right;font-weight:700;font-size:11pt;color:#0f766e;">&yen;' + n(d.amount) + '</td></tr>'
+        + '<tr style="border-bottom:1px solid #dde3ea;"><td style="padding:2mm 4mm;font-size:8.5pt;color:#5a6577;">\u3046\u3061\u6D88\u8CBB\u7A0E\u7B49\uFF0810%\uFF09</td><td style="padding:2mm 4mm;text-align:right;font-size:9pt;color:#5a6577;">&yen;' + n(d.internalTax) + '</td></tr>'
+        + '</table>'
+        + '<div style="margin-bottom:10mm;">'
+        + '<h3 style="font-size:10pt;font-weight:700;margin:0 0 2mm;border-bottom:1px solid #dde3ea;padding-bottom:1mm;">\u5099\u8003</h3>'
+        + '<ul style="font-size:9pt;color:#5a6577;padding-left:5mm;margin:0;list-style:disc;line-height:2;">'
+        + '<li>\u30E9\u30A4\u30BB\u30F3\u30B9\u306F1\u53F0\u306EPC\u306B\u7D10\u3065\u304D\u307E\u3059\u3002</li>'
+        + '<li>\u304A\u652F\u6255\u3044\u78BA\u8A8D\u5F8C\u3001\u30E9\u30A4\u30BB\u30F3\u30B9\u30AD\u30FC\u3092\u30E1\u30FC\u30EB\u3067\u304A\u9001\u308A\u3057\u307E\u3059\u3002</li>'
+        + '<li>\u304A\u652F\u6255\u3044\u65B9\u6CD5: \u30AF\u30EC\u30B8\u30C3\u30C8\u30AB\u30FC\u30C9\u6C7A\u6E08\uFF08Stripe\uFF09\u307E\u305F\u306F\u9280\u884C\u632F\u8FBC</li>'
+        + '<li>\u9280\u884C\u632F\u8FBC\u5148: GMO\u3042\u304A\u305E\u3089\u30CD\u30C3\u30C8\u9280\u884C \u3046\u307F\u652F\u5E97\uFF08301\uFF09 \u666E\u901A 3195015 \u30E8\u30A6\u3000\u30AB\u30E8\u30A6</li>'
+        + '<li>\u672C\u898B\u7A4D\u66F8\u306E\u6709\u52B9\u671F\u9650\u306F\u767A\u884C\u65E5\u304B\u308930\u65E5\u9593\u3067\u3059\u3002</li>'
+        + '</ul>'
+        + '</div>'
+        + '<hr style="border:none;border-top:1px solid #dde3ea;margin:0 0 6mm;">'
+        + '<table style="width:100%;border-collapse:collapse;"><tr>'
+        + '<td style="vertical-align:top;font-size:9pt;color:#5a6577;padding:0;">'
+        + '<p style="font-weight:700;color:#1e293b;font-size:10.5pt;margin:0 0 1mm;">StrataWorks</p>'
+        + '<p style="margin:0;">\u304A\u554F\u3044\u5408\u308F\u305B: info@strataworks.dev</p>'
+        + '</td>'
+        + '<td style="text-align:right;vertical-align:top;padding:0;">'
+        + '<div style="display:inline-flex;flex-direction:column;align-items:center;justify-content:center;border:2px solid #c0392b;width:20mm;height:20mm;color:#c0392b;font-weight:700;font-size:7pt;line-height:1.4;">'
+        + '<span>Strata</span><span>Works</span>'
+        + '</div>'
+        + '</td>'
+        + '</tr></table>'
+        + '</div>';
+    }
+  </script>
+
+</body>
+</html>
