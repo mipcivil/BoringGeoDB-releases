@@ -807,37 +807,23 @@
   <section id="pricing">
     <div class="container">
       <div class="section-header">
-        <h2>無料版と有料版</h2>
+        <h2>料金プラン</h2>
+        <p>現在ベータ版特別価格でご提供中です</p>
       </div>
-      <div class="pricing-grid">
-        <div class="pricing-card free">
-          <div class="plan-name">無料版</div>
-          <div class="price" style="font-size: 1.8rem;">&yen;0</div>
-          <div class="period">ずっと無料</div>
-          <ul>
-            <li class="yes">XML読み込み・地図表示</li>
-            <li class="yes">ボーリング一覧・詳細表示</li>
-            <li class="yes">XMLエディタ（基本機能）</li>
-            <li class="yes">柱状図プレビュー・PDF出力</li>
-            <li class="no">断面図・地盤モデル</li>
-            <li class="no">納品データ生成</li>
-            <li class="no">積算・見積機能</li>
-            <li class="no">クエリ実行・一括検索</li>
-          </ul>
-          <a class="btn btn-green" href="https://github.com/mipcivil/BoringGeoDB-releases/releases/latest" target="_blank" rel="noopener" style="width: 100%; text-align: center; padding: 10px 16px; font-size: 0.88rem;">ダウンロード</a>
-        </div>
+      <div class="pricing-grid" style="grid-template-columns: 1fr; max-width: 420px;">
         <div class="pricing-card featured">
-          <div class="plan-name">有料版</div>
-          <div class="price">&yen;5,000</div>
-          <div class="period">/ 月（税込）　or　&yen;54,000 / 年</div>
+          <div class="plan-name" style="margin-bottom:8px;">BoringGeoDB</div>
+          <div style="display:inline-block;background:#fef3c7;color:#92400e;padding:2px 10px;border-radius:12px;font-size:0.75rem;font-weight:700;margin-bottom:14px;">ベータ版価格</div>
+          <div class="price">&yen;4,000</div>
+          <div class="period">/ 月（税込）　or　&yen;48,000 / 年</div>
           <ul>
-            <li class="yes">無料版のすべての機能</li>
+            <li class="yes">地図ビュー・ボーリング一覧</li>
             <li class="yes">断面図生成（DXF/P21）</li>
             <li class="yes">3D地盤モデル構築</li>
             <li class="yes">納品データ一括生成</li>
             <li class="yes">積算・見積レポート</li>
             <li class="yes">クエリ実行・データ検索</li>
-            <li class="yes">XMLエディタ有料機能</li>
+            <li class="yes">XMLエディタ全機能（柱状図PDF/DXF出力含む）</li>
           </ul>
           <p style="font-size: 0.78rem; color: var(--text-muted);">
             いつでもキャンセル可。アプリ内からも購入できます。
@@ -849,7 +835,7 @@
         </div>
       </div>
       <p style="text-align: center; margin-top: 20px; font-size: 0.82rem; color: var(--text-muted);">
-        ※ ベータ版のため、正式リリース時に価格が変更される場合があります。
+        ※ 現在ベータ版のため特別価格で提供しています。正式リリース後に価格を調整する場合があります。
       </p>
     </div>
   </section>
@@ -878,9 +864,9 @@
         <h2>よくある質問</h2>
       </div>
       <div class="terms" style="max-width: 680px;">
-        <p><strong>Q. BoringXMLEditorとの違いは何ですか？</strong><br>BoringXMLEditorは1ファイルずつのXML編集に特化しています。BoringGeoDBはそのエディタ機能を内蔵しつつ、複数XMLの統合管理・地図表示・断面図・地盤モデル・納品データ生成などのプロジェクト管理機能を追加したソフトです。</p>
+        <p><strong>Q. BoringXMLEditorとの違いは何ですか？</strong><br>BoringXMLEditorは1ファイルずつのXML編集に特化した無料ツールです。BoringGeoDBはそのエディタ機能を内蔵しつつ、複数XMLの統合管理・地図表示・断面図・地盤モデル・納品データ生成などのプロジェクト管理機能を追加したソフトです。</p>
         <p style="margin-top: 16px;"><strong>Q. BoringXMLEditorのライセンスも必要ですか？</strong><br>いいえ。BoringGeoDBのライセンスにはエディタの有料機能（DXF出力等）も含まれています。別途購入は不要です。</p>
-        <p style="margin-top: 16px;"><strong>Q. 無料版でどこまで使えますか？</strong><br>XMLの読み込み・地図表示・ボーリング一覧・柱状図PDF出力が使えます。断面図・地盤モデル・納品データ生成は有料版です。</p>
+        <p style="margin-top: 16px;"><strong>Q. ベータ版の価格は変わりますか？</strong><br>現在はベータ版特別価格で提供しています。正式リリース後に価格を調整する場合がありますが、ベータ期間中にご契約いただいた方は次回更新時まで現在の価格が適用されます。</p>
         <p style="margin-top: 16px;"><strong>Q. インストールは必要ですか？</strong><br>不要です。ZIPを展開するだけで使えます。レジストリへの書き込みもありません。</p>
         <p style="margin-top: 16px;"><strong>Q. ライセンスはPC何台まで？</strong><br>1台に紐づきます。別のPCで使う場合は、新しいPCでライセンスキーを入力するだけで自動的に移行されます。旧PCのライセンスは無効になります。</p>
         <p style="margin-top: 16px;"><strong>Q. サブスクリプションは解約できますか？</strong><br>いつでもキャンセルできます。<a href="#manage" style="color: var(--primary-light);">サブスクリプション管理</a>からお手続きください。現在の請求期間の終了まで使えます。</p>
@@ -939,7 +925,7 @@
         <tr><th>所在地</th><td>〒450-0002 愛知県名古屋市中村区名駅4丁目24番5号 第2森ビル401</td></tr>
         <tr><th>電話番号</th><td>請求があれば遅滞なく開示いたします</td></tr>
         <tr><th>連絡先</th><td><a href="mailto:info@strataworks.dev" style="color: var(--primary-light);">info@strataworks.dev</a></td></tr>
-        <tr><th>販売価格</th><td>月額プラン: 5,000円（税込） / 年額プラン: 54,000円（税込）<br>※価格は予告なく変更される場合があります</td></tr>
+        <tr><th>販売価格</th><td>月額プラン: 4,000円（税込） / 年額プラン: 48,000円（税込）<br>※ベータ版価格。正式リリース後に調整する場合があります</td></tr>
         <tr><th>販売価格以外の必要料金</th><td>なし（インターネット接続に必要な通信費はお客様のご負担となります）</td></tr>
         <tr><th>支払方法</th><td>クレジットカード決済（Stripe経由）、銀行振込</td></tr>
         <tr><th>支払時期</th><td>クレジットカード: 購入時に即時決済、以降自動課金<br>銀行振込: 注文後14日以内にお振込み</td></tr>
@@ -1003,8 +989,8 @@
         <div style="flex: 1;">
           <label for="bankOrderPlan">プラン <span style="color: #dc2626;">*</span></label>
           <select id="bankOrderPlan" style="width: 100%; padding: 8px 12px; border: 1px solid var(--border); border-radius: 6px; font-size: 14px;">
-            <option value="monthly">月額 ¥5,000/月</option>
-            <option value="yearly">年額 ¥54,000/年</option>
+            <option value="monthly">月額 ¥4,000/月</option>
+            <option value="yearly">年額 ¥48,000/年</option>
           </select>
         </div>
         <div style="width: 100px;">
@@ -1012,7 +998,7 @@
           <input type="number" id="bankOrderQuantity" value="1" min="1" max="100" style="text-align: center;">
         </div>
       </div>
-      <div id="bankOrderTotal" style="text-align: right; font-size: 1.1rem; font-weight: 700; color: var(--primary); margin: 12px 0;">合計: ¥5,000</div>
+      <div id="bankOrderTotal" style="text-align: right; font-size: 1.1rem; font-weight: 700; color: var(--primary); margin: 12px 0;">合計: ¥4,000</div>
       <div id="bankOrderTurnstile" style="margin: 12px 0;"></div>
       <button class="btn-submit" id="bankOrderSubmit" onclick="submitBankOrder()">発注する</button>
       <p class="note">発注後、振込先情報をメールでお送りします。<br>入金確認後、ライセンスキーをメールで発行します。</p>
@@ -1049,7 +1035,7 @@
     // ── 購入モーダル ──
     function openPurchase(plan) {
       selectedPlan = plan;
-      var label = plan === "yearly" ? "年額プラン: ¥54,000 / 年（税込）" : "月額プラン: ¥5,000 / 月（税込）";
+      var label = plan === "yearly" ? "年額プラン: ¥48,000 / 年（税込）" : "月額プラン: ¥4,000 / 月（税込）";
       document.getElementById("planSummary").innerHTML = "プラン: <strong>" + label + "</strong>";
       document.getElementById("purchaseError").style.display = "none";
       document.getElementById("purchaseEmail").value = "";
@@ -1200,11 +1186,11 @@
     function updateBankOrderTotal() {
       var plan = document.getElementById("bankOrderPlan").value;
       var qty = parseInt(document.getElementById("bankOrderQuantity").value) || 1;
-      var unitPrice = plan === "yearly" ? 54000 : 5000;
+      var unitPrice = plan === "yearly" ? 48000 : 4000;
       var total = unitPrice * qty;
       var label = plan === "yearly"
-        ? "年額プラン: ¥54,000 / 年（税込）"
-        : "月額プラン: ¥5,000 / 月（税込）";
+        ? "年額プラン: ¥48,000 / 年（税込）"
+        : "月額プラン: ¥4,000 / 月（税込）";
       document.getElementById("bankOrderPlanSummary").innerHTML = "プラン: <strong>" + label + "</strong>";
       document.getElementById("bankOrderTotal").textContent = "合計: ¥" + total.toLocaleString();
     }
@@ -1302,8 +1288,8 @@
     function openQuote(plan) {
       quotePlan = plan;
       var label = plan === "yearly"
-        ? "年額プラン: &yen;54,000 / 年（税込）"
-        : "月額プラン: &yen;5,000 / 月（税込）";
+        ? "年額プラン: &yen;48,000 / 年（税込）"
+        : "月額プラン: &yen;4,000 / 月（税込）";
       document.getElementById("quotePlanSummary").innerHTML = "プラン: <strong>" + label + "</strong>";
       document.getElementById("quoteError").style.display = "none";
       document.getElementById("quoteCompany").value = "";
@@ -1363,7 +1349,7 @@
       submitBtn.disabled = true;
       submitBtn.textContent = "PDF\u751F\u6210\u4E2D...";
 
-      var unitPrice = quotePlan === "yearly" ? 54000 : 5000;
+      var unitPrice = quotePlan === "yearly" ? 48000 : 4000;
       var planLabel = quotePlan === "yearly" ? "\u5E74\u984D\u30E9\u30A4\u30BB\u30F3\u30B9" : "\u6708\u984D\u30E9\u30A4\u30BB\u30F3\u30B9";
       var periodLabel = quotePlan === "yearly" ? "/ \u5E74" : "/ \u6708";
 
