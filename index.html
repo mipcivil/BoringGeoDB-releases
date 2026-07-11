@@ -789,7 +789,6 @@
           <button class="btn btn-teal" style="width: 100%; margin-top: 12px; padding: 10px 16px; font-size: 0.88rem;" onclick="openPurchase('monthly')">月額で購入</button>
           <button class="btn-quote-link" onclick="openPurchase('yearly')">年額で購入</button>
           <button class="btn-quote-link" onclick="openQuote('monthly')">見積書をダウンロード &rarr;</button>
-          <button class="btn-quote-link" onclick="openBankOrder('monthly')" style="color: var(--primary); margin-top: 4px;">銀行振込で発注する &rarr;</button>
         </div>
       </div>
       <p style="text-align: center; margin-top: 20px; font-size: 0.82rem; color: var(--text-muted);">
@@ -805,8 +804,7 @@
         <h2>サブスクリプション管理</h2>
       </div>
       <div class="manage-sub">
-        <p>クレジットカード決済でご購入の方は、購入時のメールアドレスを入力してください。<br>Stripe のポータルで、プラン変更・キャンセル・支払い方法の更新ができます。</p>
-        <p style="font-size: 0.8rem; color: var(--text-muted); margin-bottom: 0;">※ 銀行振込でご購入の方は自動更新されません。キャンセルをご希望の場合は、次回の振込を行わないでください。</p>
+        <p>ご購入時のメールアドレスを入力してください。<br>Stripe のポータルで、プラン変更・キャンセル・支払い方法の更新ができます。</p>
         <input type="email" id="manageEmail" placeholder="your@email.com" autocomplete="email">
         <div class="manage-error" id="manageError"></div>
         <button class="btn-manage" id="manageBtn" onclick="openPortal()">管理画面を開く</button>
@@ -852,7 +850,6 @@
         <h3>支払い</h3>
         <ul>
           <li>クレジットカード決済は Stripe を通じて安全に処理されます。購入時に即座に請求され、以降はプランに応じて毎月または毎年自動課金されます。</li>
-          <li>銀行振込の場合、注文後14日以内にお振込みください。入金確認後、ライセンスキーをメールで発行します。</li>
           <li>価格は予告なく変更される場合があります。既存のサブスクリプションには次回更新時から適用されます。</li>
         </ul>
 
@@ -881,9 +878,9 @@
       <table class="tokushoho-table">
         <tr><th>販売価格</th><td>月額プラン: 4,000円（税込） / 年額プラン: 48,000円（税込）<br>※ベータ版価格。正式リリース後に調整する場合があります</td></tr>
         <tr><th>販売価格以外の必要料金</th><td>なし（インターネット接続に必要な通信費はお客様のご負担となります）</td></tr>
-        <tr><th>支払方法</th><td>クレジットカード決済（Stripe経由）、銀行振込</td></tr>
-        <tr><th>支払時期</th><td>クレジットカード: 購入時に即時決済、以降自動課金<br>銀行振込: 注文後14日以内にお振込み</td></tr>
-        <tr><th>商品の引渡時期</th><td>クレジットカード: 決済完了後、即時発行<br>銀行振込: 入金確認後、1〜2営業日以内にメールで発行</td></tr>
+        <tr><th>支払方法</th><td>クレジットカード決済（Stripe経由）</td></tr>
+        <tr><th>支払時期</th><td>購入時に即時決済、以降自動課金</td></tr>
+        <tr><th>商品の引渡時期</th><td>決済完了後、即時発行</td></tr>
         <tr><th>返品・キャンセル</th><td>サブスクリプションはいつでもキャンセル可能です。キャンセル後も現在の請求期間終了まで利用できます。購入後7日以内で重大な不具合により利用できない場合に限り、返金をご相談いただけます。</td></tr>
         <tr><th>動作環境</th><td>Windows 10 / 11（64bit）</td></tr>
         <tr><th>連絡先</th><td><a href="mailto:info@strataworks.dev" style="color: var(--primary-light);">info@strataworks.dev</a></td></tr>
@@ -923,43 +920,6 @@
       <input type="number" id="quoteQuantity" value="1" min="1" max="100">
       <button class="btn-submit" id="quoteSubmit" onclick="generateQuote()">見積書をPDFで発行</button>
       <p class="note">PDFファイルとして即時ダウンロードされます。<br>有効期限は発行日から30日間です。</p>
-    </div>
-  </div>
-
-  <!-- ===== Bank Transfer Order Modal ===== -->
-  <div class="modal-overlay" id="bankOrderModal">
-    <div class="modal" style="max-width: 520px;">
-      <button class="modal-close" onclick="closeBankOrder()">&times;</button>
-      <h3>銀行振込で発注</h3>
-      <div class="plan-summary" id="bankOrderPlanSummary"></div>
-      <div class="error-msg" id="bankOrderError"></div>
-      <label for="bankOrderCompany">会社名・団体名 <span style="color: #dc2626;">*</span></label>
-      <input type="text" id="bankOrderCompany" placeholder="株式会社○○○○">
-      <label for="bankOrderPerson">ご担当者名 <span style="color: #dc2626;">*</span></label>
-      <input type="text" id="bankOrderPerson" placeholder="山田 太郎">
-      <label for="bankOrderEmail">メールアドレス <span style="color: #dc2626;">*</span></label>
-      <input type="email" id="bankOrderEmail" placeholder="your@email.com" autocomplete="email">
-      <label for="bankOrderPhone">電話番号（任意）</label>
-      <input type="tel" id="bankOrderPhone" placeholder="03-1234-5678">
-      <label for="bankOrderQuoteNo">見積書番号（任意）</label>
-      <input type="text" id="bankOrderQuoteNo" placeholder="Q-20260323-0001">
-      <div style="display: flex; gap: 12px; align-items: end;">
-        <div style="flex: 1;">
-          <label for="bankOrderPlan">プラン <span style="color: #dc2626;">*</span></label>
-          <select id="bankOrderPlan" style="width: 100%; padding: 8px 12px; border: 1px solid var(--border); border-radius: 6px; font-size: 14px;">
-            <option value="monthly">月額 ¥4,000/月</option>
-            <option value="yearly">年額 ¥48,000/年</option>
-          </select>
-        </div>
-        <div style="width: 100px;">
-          <label for="bankOrderQuantity">数量</label>
-          <input type="number" id="bankOrderQuantity" value="1" min="1" max="100" style="text-align: center;">
-        </div>
-      </div>
-      <div id="bankOrderTotal" style="text-align: right; font-size: 1.1rem; font-weight: 700; color: var(--primary); margin: 12px 0;">合計: ¥4,000</div>
-      <div id="bankOrderTurnstile" style="margin: 12px 0;"></div>
-      <button class="btn-submit" id="bankOrderSubmit" onclick="submitBankOrder()">発注する</button>
-      <p class="note">発注後、振込先情報をメールでお送りします。<br>入金確認後、ライセンスキーをメールで発行します。</p>
     </div>
   </div>
 
@@ -1101,144 +1061,16 @@
       if (e.target === this) closeTokushoho();
     });
 
-    // ── 銀行振込発注モーダル ──
-    var bankOrderPlan = "monthly";
-    var turnstileSiteKey = "0x4AAAAAABB_placeholder";
-    var turnstileWidgetId = null;
-    var turnstileToken = null;
-
-    function openBankOrder(plan) {
-      bankOrderPlan = plan;
-      document.getElementById("bankOrderPlan").value = plan;
-      document.getElementById("bankOrderError").style.display = "none";
-      document.getElementById("bankOrderCompany").value = "";
-      document.getElementById("bankOrderPerson").value = "";
-      document.getElementById("bankOrderEmail").value = "";
-      document.getElementById("bankOrderPhone").value = "";
-      document.getElementById("bankOrderQuoteNo").value = "";
-      document.getElementById("bankOrderQuantity").value = "1";
-      document.getElementById("bankOrderSubmit").disabled = false;
-      document.getElementById("bankOrderSubmit").textContent = "発注する";
-      turnstileToken = null;
-      updateBankOrderTotal();
-      document.getElementById("bankOrderModal").classList.add("active");
-      var container = document.getElementById("bankOrderTurnstile");
-      container.innerHTML = "";
-      if (typeof turnstile !== "undefined" && turnstileSiteKey.indexOf("placeholder") === -1) {
-        turnstileWidgetId = turnstile.render(container, {
-          sitekey: turnstileSiteKey,
-          theme: "light",
-          callback: function(token) { turnstileToken = token; }
-        });
-      }
-    }
-
-    function closeBankOrder() {
-      document.getElementById("bankOrderModal").classList.remove("active");
-    }
-
-    document.getElementById("bankOrderModal").addEventListener("click", function(e) {
-      if (e.target === this) closeBankOrder();
-    });
-
-    function updateBankOrderTotal() {
-      var plan = document.getElementById("bankOrderPlan").value;
-      var qty = parseInt(document.getElementById("bankOrderQuantity").value) || 1;
-      var unitPrice = plan === "yearly" ? 48000 : 4000;
-      var total = unitPrice * qty;
-      var label = plan === "yearly"
-        ? "年額プラン: ¥48,000 / 年（税込）"
-        : "月額プラン: ¥4,000 / 月（税込）";
-      document.getElementById("bankOrderPlanSummary").innerHTML = "プラン: <strong>" + label + "</strong>";
-      document.getElementById("bankOrderTotal").textContent = "合計: ¥" + total.toLocaleString();
-    }
-
-    document.getElementById("bankOrderPlan").addEventListener("change", updateBankOrderTotal);
-    document.getElementById("bankOrderQuantity").addEventListener("input", updateBankOrderTotal);
-
-    function submitBankOrder() {
-      var company = document.getElementById("bankOrderCompany").value.trim();
-      var person = document.getElementById("bankOrderPerson").value.trim();
-      var email = document.getElementById("bankOrderEmail").value.trim();
-      var phone = document.getElementById("bankOrderPhone").value.trim();
-      var quoteNo = document.getElementById("bankOrderQuoteNo").value.trim();
-      var plan = document.getElementById("bankOrderPlan").value;
-      var quantity = parseInt(document.getElementById("bankOrderQuantity").value) || 1;
-      var errorEl = document.getElementById("bankOrderError");
-      var submitBtn = document.getElementById("bankOrderSubmit");
-
-      if (!company) {
-        errorEl.textContent = "会社名・団体名を入力してください。";
-        errorEl.style.display = "block";
-        return;
-      }
-      if (!person) {
-        errorEl.textContent = "ご担当者名を入力してください。";
-        errorEl.style.display = "block";
-        return;
-      }
-      if (!email || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
-        errorEl.textContent = "有効なメールアドレスを入力してください。";
-        errorEl.style.display = "block";
-        return;
-      }
-
-      errorEl.style.display = "none";
-      submitBtn.disabled = true;
-      submitBtn.textContent = "送信中...";
-
-      fetch(API_URL + "/api/order", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          company: company,
-          person: person,
-          email: email,
-          phone: phone || undefined,
-          plan: plan,
-          quantity: quantity,
-          product: PRODUCT,
-          quote_number: quoteNo || undefined,
-          turnstile_token: turnstileToken || undefined
-        })
-      })
-      .then(function(res) { return res.json().then(function(d) { return { ok: res.ok, data: d }; }); })
-      .then(function(result) {
-        if (result.ok) {
-          var modal = document.getElementById("bankOrderModal").querySelector(".modal");
-          modal.innerHTML = '<button class="modal-close" onclick="closeBankOrder()">&times;</button>'
-            + '<div style="text-align: center; padding: 20px 0;">'
-            + '<div style="font-size: 48px; margin-bottom: 16px;">&#x2705;</div>'
-            + '<h3>ご注文を受け付けました</h3>'
-            + '<p style="margin: 16px 0;">注文番号: <strong style="font-family: monospace; font-size: 1.1rem; color: var(--primary);">' + result.data.order_number + '</strong></p>'
-            + '<p>振込先情報を <strong>' + email + '</strong> にお送りしました。</p>'
-            + '<p style="font-size: 0.85rem; color: var(--text-muted); margin-top: 12px;">入金確認後、ライセンスキーをメールでお届けします。</p>'
-            + '<button class="btn-submit" onclick="closeBankOrder()" style="margin-top: 20px;">閉じる</button>'
-            + '</div>';
-        } else {
-          throw new Error(result.data.error || "エラーが発生しました。");
-        }
-      })
-      .catch(function(err) {
-        errorEl.textContent = err.message || "通信エラーが発生しました。しばらくしてから再度お試しください。";
-        errorEl.style.display = "block";
-        submitBtn.disabled = false;
-        submitBtn.textContent = "発注する";
-      });
-    }
-
     // ── Escape キー ──
     document.addEventListener("keydown", function(e) {
       if (e.key === "Escape") {
         closePurchase();
         closeTokushoho();
-        closeBankOrder();
         closeQuote();
       }
     });
   </script>
 
-  <script src="https://challenges.cloudflare.com/turnstile/v0/api.js?render=explicit" async defer></script>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
   <script>
     var quotePlan = "monthly";
@@ -1408,8 +1240,7 @@
         + '<ul style="font-size:9pt;color:#5a6577;padding-left:5mm;margin:0;list-style:disc;line-height:2;">'
         + '<li>\u30E9\u30A4\u30BB\u30F3\u30B9\u306F1\u53F0\u306EPC\u306B\u7D10\u3065\u304D\u307E\u3059\u3002</li>'
         + '<li>\u304A\u652F\u6255\u3044\u78BA\u8A8D\u5F8C\u3001\u30E9\u30A4\u30BB\u30F3\u30B9\u30AD\u30FC\u3092\u30E1\u30FC\u30EB\u3067\u304A\u9001\u308A\u3057\u307E\u3059\u3002</li>'
-        + '<li>\u304A\u652F\u6255\u3044\u65B9\u6CD5: \u30AF\u30EC\u30B8\u30C3\u30C8\u30AB\u30FC\u30C9\u6C7A\u6E08\uFF08Stripe\uFF09\u307E\u305F\u306F\u9280\u884C\u632F\u8FBC</li>'
-        + '<li>\u9280\u884C\u632F\u8FBC\u5148: GMO\u3042\u304A\u305E\u3089\u30CD\u30C3\u30C8\u9280\u884C \u3046\u307F\u652F\u5E97\uFF08301\uFF09 \u666E\u901A 3195015 \u30E8\u30A6\u3000\u30AB\u30E8\u30A6</li>'
+        + '<li>\u304A\u652F\u6255\u3044\u65B9\u6CD5: \u30AF\u30EC\u30B8\u30C3\u30C8\u30AB\u30FC\u30C9\u6C7A\u6E08\uFF08Stripe\uFF09</li>'
         + '<li>\u672C\u898B\u7A4D\u66F8\u306E\u6709\u52B9\u671F\u9650\u306F\u767A\u884C\u65E5\u304B\u308930\u65E5\u9593\u3067\u3059\u3002</li>'
         + '</ul>'
         + '</div>'
